@@ -43,9 +43,6 @@ class LSTMClassifier(nn.Module):
 			output, (h_n, c_n) = self.lstm(lstm_input)
 			# print ("h_n " + str(h_n.squeeze().shape))
 			decoded = self.linear(h_n.squeeze())
-			# print ("decode " + str(decoded.shape))
-			# pred = torch.argmax(output, dim = 1).reshape(-1,1).float()
-			# print ("pred " + str(pred.shape))
 			return decoded
 		"""
 		if mode == 'AdvLSTM' :
