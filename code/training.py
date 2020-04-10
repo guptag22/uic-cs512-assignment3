@@ -14,7 +14,7 @@ batch_size = 27
 output_size = 9   # number of class
 hidden_size = 50  # LSTM output size of each time step
 input_size = 12
-basic_epoch = 300
+basic_epoch = 500
 Adv_epoch = 100
 Prox_epoch = 100
 
@@ -37,8 +37,8 @@ def train_model(model, train_iter, mode):
     model.train()
     for idx, batch in enumerate(train_iter):
         input = batch[0]
-        target = batch[1].reshape(-1,1).float()
-        target = torch.autograd.Variable(target, requires_grad = True)
+        target = batch[1]
+        target = torch.autograd.Variable(target).long()
         r = 0
         optim.zero_grad()
         prediction = model(input, r,batch_size = input.size()[0], mode = mode)
@@ -73,8 +73,8 @@ def eval_model(model, test_iter, mode):
     with torch.no_grad():
         for idx, batch in enumerate(test_iter):
             input = batch[0]
-            target = batch[1].reshape(-1,1)
-            target = torch.autograd.Variable(target).float()
+            target = batch[1]
+            target = torch.autograd.Variable(target).long()
             prediction = model(input, r, batch_size=input.size()[0], mode = mode)
             loss = loss_fn(prediction, target)
             num_corrects = (torch.max(prediction, 1)[1].view(target.size()).data == target.data).sum()
@@ -105,7 +105,7 @@ train_iter, test_iter = load_data.load_data('code/JV_data.mat', batch_size)
 
 
 model = LSTMClassifier(batch_size, output_size, hidden_size, input_size)
-loss_fn = F.mse_loss
+loss_fn = F.cross_entropy
 optim = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=1e-3, weight_decay=1e-3)
 
 # for p in model.parameters():
