@@ -33,20 +33,21 @@ class LSTMClassifier(nn.Module):
 		'''need to be implemented'''
 		if mode == 'plain' :
 				# chain up the layers
-			print ("input " + str(input.shape))
+			# print ("input " + str(input.shape))
 			normalized = F.normalize(input)
-			print ("normalized " + str(normalized.shape))
+			# print ("normalized " + str(normalized.shape))
 			embedding = self.conv(normalized.permute(0,2,1)).permute(0,2,1)
-			print ("embedding " + str(embedding.shape))
+			# print ("embedding " + str(embedding.shape))
 			lstm_input = torch.flatten(self.relu(embedding),0,1)
-			print ("lstm_input " + str(lstm_input.shape))
+			# print ("lstm_input " + str(lstm_input.shape))
 			h_state, c_state = self.lstm(lstm_input)
 			h_state = h_state.reshape(embedding.shape[0],embedding.shape[1],self.hidden_size)
-			print ("hidden " + str(h_state.shape))
+			# print ("hidden " + str(h_state.shape))
 			output = self.linear(h_state[:,-1])
-			print ("output " + str(output.shape))
-			pred = torch.argmax(output, dim = 1).reshape(-1,1)
-			print ("pred " + str(pred.shape))
+			# print ("output " + str(output.shape))
+			pred = torch.argmax(output, dim = 1).reshape(-1,1).float()
+			pred.requires_grad = True
+			# print ("pred " + str(pred.shape))
 			return pred
 		"""
 		if mode == 'AdvLSTM' :

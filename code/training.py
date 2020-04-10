@@ -38,13 +38,13 @@ def train_model(model, train_iter, mode):
     for idx, batch in enumerate(train_iter):
         input = batch[0]
         target = batch[1].reshape(-1,1)
-        target = torch.autograd.Variable(target).long()
+        target = torch.autograd.Variable(target).float()
         r = 0
         optim.zero_grad()
         prediction = model(input, r,batch_size = input.size()[0], mode = mode)
-        print("prediction ", prediction)
-        print("target ", target)
-        loss = loss_fn(prediction.float(), target.float())
+        # print("prediction ", prediction)
+        # print("target ", target)
+        loss = loss_fn(prediction, target)
         if mode == 'AdvLSTM':
 
 
@@ -73,8 +73,8 @@ def eval_model(model, test_iter, mode):
     with torch.no_grad():
         for idx, batch in enumerate(test_iter):
             input = batch[0]
-            target = batch[1]
-            target = torch.autograd.Variable(target).long()
+            target = batch[1].reshape(-1,1)
+            target = torch.autograd.Variable(target).float()
             prediction = model(input, r, batch_size=input.size()[0], mode = mode)
             loss = loss_fn(prediction, target)
             num_corrects = (torch.max(prediction, 1)[1].view(target.size()).data == target.data).sum()
