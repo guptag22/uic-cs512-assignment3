@@ -37,14 +37,14 @@ def train_model(model, train_iter, mode):
     model.train()
     for idx, batch in enumerate(train_iter):
         input = batch[0]
-        target = batch[1]
+        target = batch[1].reshape(-1,1)
         target = torch.autograd.Variable(target).long()
         r = 0
         optim.zero_grad()
         prediction = model(input, r,batch_size = input.size()[0], mode = mode)
         print("prediction ", prediction)
         print("target ", target)
-        loss = loss_fn(prediction.reshape(-1,1), target.reshape(-1,1))
+        loss = loss_fn(prediction.float(), target.float())
         if mode == 'AdvLSTM':
 
 
@@ -105,7 +105,7 @@ train_iter, test_iter = load_data.load_data('code/JV_data.mat', batch_size)
 
 
 model = LSTMClassifier(batch_size, output_size, hidden_size, input_size)
-loss_fn = F.cross_entropy
+loss_fn = F.mse_loss
 
 for epoch in range(basic_epoch):
         optim = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=1e-3, weight_decay=1e-3)

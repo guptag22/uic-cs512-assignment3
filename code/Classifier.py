@@ -41,12 +41,11 @@ class LSTMClassifier(nn.Module):
 			lstm_input = torch.flatten(self.relu(embedding),0,1)
 			print ("lstm_input " + str(lstm_input.shape))
 			h_state, c_state = self.lstm(lstm_input)
-			# print ("hidden " + str(h_state.shape))
 			h_state = h_state.reshape(embedding.shape[0],embedding.shape[1],self.hidden_size)
 			print ("hidden " + str(h_state.shape))
 			output = self.linear(h_state[:,-1])
 			print ("output " + str(output.shape))
-			pred = torch.argmax(output, dim = 1)
+			pred = torch.argmax(output, dim = 1).reshape(-1,1)
 			print ("pred " + str(pred.shape))
 			return pred
 		"""
