@@ -19,7 +19,7 @@ class LSTMClassifier(nn.Module):
 		# self.normalize = F.normalize()
 		self.conv = nn.Conv1d(in_channels= self.input_size, out_channels= 64, kernel_size= 3, stride= 1) # feel free to change out_channels, kernel_size, stride
 		self.relu = nn.ReLU()
-		self.lstm = nn.LSTMCell(64, hidden_size)
+		self.lstm = nn.LSTM(64, hidden_size, batch_first = True)
 		self.linear = nn.Linear(self.hidden_size, self.output_size)
 
 
@@ -38,17 +38,15 @@ class LSTMClassifier(nn.Module):
 			# print ("normalized " + str(normalized.shape))
 			embedding = self.conv(normalized.permute(0,2,1)).permute(0,2,1)
 			# print ("embedding " + str(embedding.shape))
-			lstm_input = torch.flatten(self.relu(embedding),0,1)
+			lstm_input = self.relu(embedding)
 			# print ("lstm_input " + str(lstm_input.shape))
-			h_state, c_state = self.lstm(lstm_input)
-			h_state = h_state.reshape(embedding.shape[0],embedding.shape[1],self.hidden_size)
-			# print ("hidden " + str(h_state.shape))
-			output = self.linear(h_state[:,-1])
-			# print ("output " + str(output.shape))
-			pred = torch.argmax(output, dim = 1).reshape(-1,1).float()
-			pred.requires_grad = True
+			output, (h_n, c_n) = self.lstm(lstm_input)
+			# print ("h_n " + str(h_n.squeeze().shape))
+			decoded = self.linear(h_n.squeeze())
+			# print ("decode " + str(decoded.shape))
+			# pred = torch.argmax(output, dim = 1).reshape(-1,1).float()
 			# print ("pred " + str(pred.shape))
-			return pred
+			return decoded
 		"""
 		if mode == 'AdvLSTM' :
 			# chain up the layers

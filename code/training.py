@@ -37,8 +37,8 @@ def train_model(model, train_iter, mode):
     model.train()
     for idx, batch in enumerate(train_iter):
         input = batch[0]
-        target = batch[1].reshape(-1,1)
-        target = torch.autograd.Variable(target).float()
+        target = batch[1].reshape(-1,1).float()
+        target = torch.autograd.Variable(target, requires_grad = True)
         r = 0
         optim.zero_grad()
         prediction = model(input, r,batch_size = input.size()[0], mode = mode)
@@ -106,9 +106,13 @@ train_iter, test_iter = load_data.load_data('code/JV_data.mat', batch_size)
 
 model = LSTMClassifier(batch_size, output_size, hidden_size, input_size)
 loss_fn = F.mse_loss
+optim = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=1e-3, weight_decay=1e-3)
+
+# for p in model.parameters():
+#     if p.requires_grad:
+#          print(p.name)
 
 for epoch in range(basic_epoch):
-        optim = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=1e-3, weight_decay=1e-3)
         train_loss, train_acc = train_model(model, train_iter, mode = 'plain')
         val_loss, val_acc = eval_model(model, test_iter, mode ='plain')
         print(f'Epoch: {epoch+1:02}, Train Loss: {train_loss:.3f}, Train Acc: {train_acc:.2f}%, Test Loss: {val_loss:3f}, Test Acc: {val_acc:.2f}%')
