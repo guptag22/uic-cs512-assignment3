@@ -42,7 +42,9 @@ def train_model(model, train_iter, mode):
         r = 0
         optim.zero_grad()
         prediction = model(input, r,batch_size = input.size()[0], mode = mode)
-        loss = loss_fn(prediction, target)
+        print("prediction ", prediction)
+        print("target ", target)
+        loss = loss_fn(prediction.reshape(-1,1), target.reshape(-1,1))
         if mode == 'AdvLSTM':
 
 
@@ -93,13 +95,13 @@ def compute_perturbation(loss, model):
     # Use autograd
 
 
-    return the value of g / ||g||
+    # return the value of g / ||g||
 
 
 
 ''' Training basic model '''
 
-train_iter, test_iter = load_data.load_data('JV_data.mat', batch_size)
+train_iter, test_iter = load_data.load_data('code/JV_data.mat', batch_size)
 
 
 model = LSTMClassifier(batch_size, output_size, hidden_size, input_size)
@@ -112,7 +114,7 @@ for epoch in range(basic_epoch):
         print(f'Epoch: {epoch+1:02}, Train Loss: {train_loss:.3f}, Train Acc: {train_acc:.2f}%, Test Loss: {val_loss:3f}, Test Acc: {val_acc:.2f}%')
 
 
-
+"""
 ''' Save and Load model'''
 
 # 1. Save the trained model from the basic LSTM
@@ -144,3 +146,4 @@ for epoch in range(Prox_epoch):
     val_loss, val_acc = eval_model(Adv_model, test_iter, mode ='AdvLSTM')
     print(f'Epoch: {epoch+1:02}, Train Loss: {train_loss:.3f}, Train Acc: {train_acc:.2f}%, Test Loss: {val_loss:3f}, Test Acc: {val_acc:.2f}%')
 
+"""
