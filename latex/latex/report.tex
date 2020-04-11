@@ -1,0 +1,61 @@
+\documentclass[11pt]{report}
+\usepackage{./assignmentMod}
+\usepackage{slashbox}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{enumerate}
+\usepackage[shortlabels]{enumitem}
+\usepackage{stmaryrd}
+\usepackage[final]{pdfpages}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{authblk}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{epstopdf}
+
+\input{./Definitions}
+
+\begin{document}
+\title{
+  CS512: Advanced Machine Learning. \\
+  \large Assignment 3: Adversarial Training on Sequence Classification}
+
+\author{Garima Gupta: ggupta22@uic.edu \and Sai Teja Karnati: skarna3@uic.edu \and
+ Shubham Singh: ssing57@uic.edu \and Wangfei Wang: wwang75@uic.edu}
+
+\graphicspath{{../../Figures/}}
+
+\maketitle
+
+\section{(15 points) Training the Basic Model}
+
+Hyperparameters values: 
+
+\texttt{batch\_size = 27}, \texttt{hidden\_size = 10}, \texttt{basic\_epoch = 100}, \texttt{out\_channels = 64}, \texttt{kernel\_size = 10},  \texttt{stride = 3}, \texttt{lr = 1e-3} (learning rate), \texttt{weight\_decay = 1e-3}. 
+
+\begin{figure}[h]
+    \includegraphics[width = 15 cm]{BasicModel.png}
+    \centering
+\end{figure}
+
+
+
+
+\section{(10 points)  Save and Load Pretrained Model}
+
+See code. 
+
+\section{(25 points) Adversarial Training as Regularization}
+
+\section{(40 points) Adversarial Training as Proximal Mapping}
+
+\section{(10 points) Dropout and Batch Normalization}
+
+
+
+
+
+\end{document}
