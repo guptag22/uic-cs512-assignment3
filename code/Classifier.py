@@ -17,7 +17,7 @@ class LSTMClassifier(nn.Module):
 		self.hidden_size = hidden_size  #the dimension of the LSTM output layer
 		self.input_size = input_size	  # should be 12
 		# self.normalize = F.normalize()
-		self.conv = nn.Conv1d(in_channels= self.input_size, out_channels= 64, kernel_size= 3, stride= 1) # feel free to change out_channels, kernel_size, stride
+		self.conv = nn.Conv1d(in_channels= self.input_size, out_channels= 64, kernel_size= 10, stride= 3) # feel free to change out_channels, kernel_size, stride
 		self.relu = nn.ReLU()
 		self.lstm = nn.LSTM(64, hidden_size, batch_first = True)
 		self.linear = nn.Linear(self.hidden_size, self.output_size)

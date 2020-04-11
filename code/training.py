@@ -5,16 +5,16 @@ import torch.nn.functional as F
 from torch.autograd import grad
 import torch.optim as optim
 from Classifier import LSTMClassifier
-
+from plot import plot_accuracy
 
 # Hyperparameters, feel free to tune
 
 
 batch_size = 27
 output_size = 9   # number of class
-hidden_size = 50  # LSTM output size of each time step
+hidden_size = 10  # LSTM output size of each time step
 input_size = 12
-basic_epoch = 300
+basic_epoch = 100
 Adv_epoch = 100
 Prox_epoch = 100
 
@@ -103,18 +103,24 @@ def compute_perturbation(loss, model):
 
 ''' Training basic model '''
 
-train_iter, test_iter = load_data.load_data('code/JV_data.mat', batch_size)
+train_iter, test_iter = load_data.load_data('./JV_data.mat', batch_size)
 
 
 model = LSTMClassifier(batch_size, output_size, hidden_size, input_size)
 loss_fn = F.cross_entropy
 optim = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=1e-3, weight_decay=1e-3)
 
-
+train_acc_basic = []
+test_acc_basic = []
 for epoch in range(basic_epoch):
         train_loss, train_acc = train_model(model, train_iter, mode = 'plain')
         val_loss, val_acc = eval_model(model, test_iter, mode ='plain')
-        print(f'Epoch: {epoch+1:02}, Train Loss: {train_loss:.3f}, Train Acc: {train_acc:.2f}%, Test Loss: {val_loss:3f}, Test Acc: {val_acc:.2f}%')
+        #print(f'Epoch: {epoch+1:02}, Train Loss: {train_loss:.3f}, Train Acc: {train_acc:.2f}%, Test Loss: {val_loss:3f}, Test Acc: {val_acc:.2f}%')
+        train_acc_basic.append(train_acc)
+        test_acc_basic.append(val_acc)
+
+# plot test and train accuaracy. P2 
+plot_accuracy(basic_epoch, train_acc_basic, test_acc_basic, '../Figures/BasicModel.png')
 
 # Print model's state_dict
 print("Model's state_dict:")
@@ -127,7 +133,7 @@ for param_tensor in model.state_dict():
 
 
 ''' Save and Load model'''
-model_PATH = "code/myLSTMmodel.pth"
+model_PATH = "./myLSTMmodel.pth"
 
 # 1. Save the trained model from the basic LSTM
 torch.save(model.state_dict(), model_PATH)
