@@ -85,15 +85,15 @@ def eval_model(model, test_iter, mode):
 
 
 
-def compute_perturbation(loss, model):
-
-
-
+def compute_perturbation(loss, model_input, model, epsilon=0.01):
     '''need to be implemented'''
     # Use autograd
-
-
-    return the value of g / ||g||
+    g_i = grad(outputs=loss, inputs=model_input, grad_outputs=torch.ones_like(loss))
+    # double check this
+    r_i = g_i / torch.norm(g_i)
+    perturbed_input = model_input + epsilon*r_i
+    return perturbed_input
+    # return the value of g / ||g||
 
 
 
