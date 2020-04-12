@@ -38,25 +38,31 @@ def train_model(model, train_iter, mode):
     steps = 0
     model.train()
     for idx, batch in enumerate(train_iter):
+        # TODO: check if we need to surround by Variable
         input = batch[0]
+        input.requires_grad = True
         target = batch[1]
         target = torch.autograd.Variable(target).long()
         r = 0
         optim.zero_grad()
-        prediction = model(input, r,batch_size = input.size()[0], mode = mode)
-        # print("prediction ", prediction)
-        # print("target ", target)
+        prediction = model(input, r, batch_size = input.size()[0], mode = mode)
+        # print("prediction ", prediction.shape)
+        # print("target ", target.shape)
         loss = loss_fn(prediction, target)
         if mode == 'AdvLSTM':
-
-
             ''' Add adversarial training term to loss'''
-
+            # TODO: check if r is non-zero
+            r = compute_perturbation(loss, model)
+            adv_prediction = model(input, r, batch_size = input.size()[0], mode = mode)
+            adv_loss = loss_fn(adv_prediction, target)
+            # TODO: @Garima look at this
+            # loss += adv_loss
 
 
         num_corrects = (torch.max(prediction, 1)[1].view(target.size()).data == target.data).float().sum()
         acc = 100.0 * num_corrects/(input.size()[0])
         loss.backward()
+        # adv_loss.backward()
         clip_gradient(model, 1e-1)
         optim.step()
         steps += 1
@@ -89,14 +95,17 @@ def eval_model(model, test_iter, mode):
 
 
 
-def compute_perturbation(loss, model_input, model, epsilon=0.01):
+def compute_perturbation(loss, model):
     '''need to be implemented'''
     # Use autograd
-    g_i = grad(outputs=loss, inputs=model_input, grad_outputs=torch.ones_like(loss))
-    # double check this
-    r_i = g_i / torch.norm(g_i)
-    perturbed_input = model_input + epsilon*r_i
-    return perturbed_input
+    # print(model_input.grad, loss.grad)
+    g = grad(outputs=loss, inputs=model.get_lstm_input(), grad_outputs=torch.empty_like(loss), create_graph=True, only_inputs=True, allow_unused=True)
+    g = g[0]
+    # print(g.shape)
+    # TODO: double check this
+    r = g / F.normalize(g)
+    # print(r.shape)
+    return r
     # return the value of g / ||g||
 
 
@@ -112,15 +121,15 @@ optim = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), 
 
 train_acc_basic = []
 test_acc_basic = []
-for epoch in range(basic_epoch):
-        train_loss, train_acc = train_model(model, train_iter, mode = 'plain')
-        val_loss, val_acc = eval_model(model, test_iter, mode ='plain')
-        #print(f'Epoch: {epoch+1:02}, Train Loss: {train_loss:.3f}, Train Acc: {train_acc:.2f}%, Test Loss: {val_loss:3f}, Test Acc: {val_acc:.2f}%')
-        train_acc_basic.append(train_acc)
-        test_acc_basic.append(val_acc)
+# for epoch in range(basic_epoch):
+#         train_loss, train_acc = train_model(model, train_iter, mode = 'plain')
+#         val_loss, val_acc = eval_model(model, test_iter, mode ='plain')
+#         print(f'Epoch: {epoch+1:02}, Train Loss: {train_loss:.3f}, Train Acc: {train_acc:.2f}%, Test Loss: {val_loss:3f}, Test Acc: {val_acc:.2f}%')
+#         train_acc_basic.append(train_acc)
+#         test_acc_basic.append(val_acc)
 
 # plot test and train accuaracy. P2 
-plot_accuracy(basic_epoch, train_acc_basic, test_acc_basic, '../Figures/BasicModel.png')
+# plot_accuracy(basic_epoch, train_acc_basic, test_acc_basic, '../Figures/BasicModel.png')
 
 # Print model's state_dict
 print("Model's state_dict:")
@@ -147,17 +156,6 @@ Adv_model = LSTMClassifier(batch_size, output_size, hidden_size, input_size)
 Adv_model.load_state_dict(torch.load(model_PATH, map_location = device))
 
 
-"""
-''' Training Prox_model'''
-for epoch in range(Adv_epoch):
-    optim = torch.optim.Adam(filter(lambda p: p.requires_grad, Prox_model.parameters()), lr=1e-3, weight_decay=1e-3)
-    train_loss, train_acc = train_model(Prox_model, train_iter, mode = 'ProxLSTM')
-    val_loss, val_acc = eval_model(Prox_model, test_iter, mode ='ProxLSTM')
-    print(f'Epoch: {epoch+1:02}, Train Loss: {train_loss:.3f}, Train Acc: {train_acc:.2f}%, Test Loss: {val_loss:3f}, Test Acc: {val_acc:.2f}%')
-
-
-
-
 ''' Training Adv_model'''
 
 for epoch in range(Prox_epoch):
@@ -166,4 +164,12 @@ for epoch in range(Prox_epoch):
     val_loss, val_acc = eval_model(Adv_model, test_iter, mode ='AdvLSTM')
     print(f'Epoch: {epoch+1:02}, Train Loss: {train_loss:.3f}, Train Acc: {train_acc:.2f}%, Test Loss: {val_loss:3f}, Test Acc: {val_acc:.2f}%')
 
+
+"""
+''' Training Prox_model'''
+for epoch in range(Adv_epoch):
+    optim = torch.optim.Adam(filter(lambda p: p.requires_grad, Prox_model.parameters()), lr=1e-3, weight_decay=1e-3)
+    train_loss, train_acc = train_model(Prox_model, train_iter, mode = 'ProxLSTM')
+    val_loss, val_acc = eval_model(Prox_model, test_iter, mode ='ProxLSTM')
+    print(f'Epoch: {epoch+1:02}, Train Loss: {train_loss:.3f}, Train Acc: {train_acc:.2f}%, Test Loss: {val_loss:3f}, Test Acc: {val_acc:.2f}%')
 """
