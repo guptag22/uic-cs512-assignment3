@@ -54,15 +54,12 @@ def train_model(model, train_iter, mode):
             # TODO: check if r is non-zero
             r = compute_perturbation(loss, model)
             adv_prediction = model(input, r, batch_size = input.size()[0], mode = mode)
-            adv_loss = loss_fn(adv_prediction, target)
-            # TODO: @Garima look at this
-            # loss += adv_loss
+            loss = loss_fn(adv_prediction, target)
 
 
         num_corrects = (torch.max(prediction, 1)[1].view(target.size()).data == target.data).float().sum()
         acc = 100.0 * num_corrects/(input.size()[0])
         loss.backward()
-        # adv_loss.backward()
         clip_gradient(model, 1e-1)
         optim.step()
         steps += 1
@@ -98,13 +95,12 @@ def eval_model(model, test_iter, mode):
 def compute_perturbation(loss, model):
     '''need to be implemented'''
     # Use autograd
-    # print(model_input.grad, loss.grad)
-    g = grad(outputs=loss, inputs=model.get_lstm_input(), grad_outputs=torch.empty_like(loss), create_graph=True, only_inputs=True, allow_unused=True)
+    g = grad(outputs=loss, inputs=model.get_lstm_input(), retain_graph=True, only_inputs=True, allow_unused=True)
     g = g[0]
-    # print(g.shape)
-    # TODO: double check this
     r = g / F.normalize(g)
-    # print(r.shape)
+    # print(g.shape, model.get_lstm_input().shape)
+    # print(r)
+    # input()
     return r
     # return the value of g / ||g||
 
@@ -158,7 +154,7 @@ Adv_model.load_state_dict(torch.load(model_PATH, map_location = device))
 
 ''' Training Adv_model'''
 
-for epoch in range(Prox_epoch):
+for epoch in range(Adv_epoch):
     optim = torch.optim.Adam(filter(lambda p: p.requires_grad, Adv_model.parameters()), lr=5e-4, weight_decay=1e-4)
     train_loss, train_acc = train_model(Adv_model, train_iter, mode = 'AdvLSTM')
     val_loss, val_acc = eval_model(Adv_model, test_iter, mode ='AdvLSTM')

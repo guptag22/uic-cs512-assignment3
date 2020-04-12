@@ -53,7 +53,6 @@ class LSTMClassifier(nn.Module):
 			# also make sure that the chain allows computing the gradient with respect to the input of LSTM
 			normalized = F.normalize(input)
 			embedding = self.conv(normalized.permute(0,2,1)).permute(0,2,1)
-			# TODO: @Garima look at this
 			# if self.lstm_input is None:
 				# self.lstm_input = nn.Parameter(torch.empty(batch_size, , 64))
 			
