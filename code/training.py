@@ -4,8 +4,9 @@ import torch
 import torch.nn.functional as F
 from torch.autograd import grad
 import torch.optim as optim
+import numpy as np
 from Classifier import LSTMClassifier
-from plot import plot_accuracy
+
 
 # Hyperparameters, feel free to tune
 
@@ -32,7 +33,7 @@ def clip_gradient(model, clip_value):
 
 
 # Training model
-def train_model(model, train_iter, mode):
+def train_model(model, train_iter, mode, epsilon = 0.01):
     total_epoch_loss = 0
     total_epoch_acc = 0
     steps = 0
@@ -117,15 +118,20 @@ optim = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), 
 
 train_acc_basic = []
 test_acc_basic = []
-# for epoch in range(basic_epoch):
-#         train_loss, train_acc = train_model(model, train_iter, mode = 'plain')
-#         val_loss, val_acc = eval_model(model, test_iter, mode ='plain')
-#         print(f'Epoch: {epoch+1:02}, Train Loss: {train_loss:.3f}, Train Acc: {train_acc:.2f}%, Test Loss: {val_loss:3f}, Test Acc: {val_acc:.2f}%')
-#         train_acc_basic.append(train_acc)
-#         test_acc_basic.append(val_acc)
+for epoch in range(basic_epoch):
+        train_loss, train_acc = train_model(model, train_iter, mode = 'plain')
+        val_loss, val_acc = eval_model(model, test_iter, mode ='plain')
+        #print(f'Epoch: {epoch+1:02}, Train Loss: {train_loss:.3f}, Train Acc: {train_acc:.2f}%, Test Loss: {val_loss:3f}, Test Acc: {val_acc:.2f}%')
+        train_acc_basic.append(train_acc)
+        test_acc_basic.append(val_acc)
 
-# plot test and train accuaracy. P2 
-# plot_accuracy(basic_epoch, train_acc_basic, test_acc_basic, '../Figures/BasicModel.png')
+# with open("../Figures/BasicModel_train.txt", "w") as f:
+#     for item in train_acc_basic:
+#         f.write("%s\n" % item) 
+
+# with open("../Figures/BasicModel_test.txt", "w") as f:
+#     for item in test_acc_basic:
+#         f.write("%s\n" % item) 
 
 # Print model's state_dict
 print("Model's state_dict:")
@@ -136,7 +142,7 @@ for param_tensor in model.state_dict():
 
 
 
-
+''' Part 3 '''
 ''' Save and Load model'''
 model_PATH = "./myLSTMmodel.pth"
 
@@ -152,20 +158,37 @@ Adv_model = LSTMClassifier(batch_size, output_size, hidden_size, input_size)
 Adv_model.load_state_dict(torch.load(model_PATH, map_location = device))
 
 
+
+
+
 ''' Training Adv_model'''
+test_acc_adv = []
+for epsilon in [6, 0.01, 0.1, 1.0]: #optimal epsilon, ep1 = 0.01, ep2 = 0.1, ep3 = 1
+#for epsilon in range(0, 10, 2):
+#for epsilon in np.logspace(-3, 5, 9):
+    Adv_model = LSTMClassifier(batch_size, output_size, hidden_size, input_size)
+    for epoch in range(Adv_epoch):
+        optim = torch.optim.Adam(filter(lambda p: p.requires_grad, Adv_model.parameters()), lr=1e-3, weight_decay=1e-3)
+        train_loss, train_acc = train_model(Adv_model, train_iter, mode = 'AdvLSTM', epsilon = epsilon)
+        val_loss, val_acc = eval_model(Adv_model, test_iter, mode ='AdvLSTM')
+        #print(f'Epoch: {epoch+1:02}, Train Loss: {train_loss:.3f}, Train Acc: {train_acc:.2f}%, Test Loss: {val_loss:3f}, Test Acc: {val_acc:.2f}%')
+        test_acc_adv.append(val_acc)
+    #print(f'Epsilon: {epsilon}, Epoch: {epoch+1:02}, Train Loss: {train_loss:.3f}, Train Acc: {train_acc:.2f}%, Test Loss: {val_loss:3f}, Test Acc: {val_acc:.2f}%')
 
-for epoch in range(Adv_epoch):
-    optim = torch.optim.Adam(filter(lambda p: p.requires_grad, Adv_model.parameters()), lr=5e-4, weight_decay=1e-4)
-    train_loss, train_acc = train_model(Adv_model, train_iter, mode = 'AdvLSTM')
-    val_loss, val_acc = eval_model(Adv_model, test_iter, mode ='AdvLSTM')
-    print(f'Epoch: {epoch+1:02}, Train Loss: {train_loss:.3f}, Train Acc: {train_acc:.2f}%, Test Loss: {val_loss:3f}, Test Acc: {val_acc:.2f}%')
+# with open("../Figures/AdvModel_acc.txt", "w") as txt_file:
+#     for item in test_acc_adv:
+#         txt_file.write("%s\n" % item) 
 
 
-"""
-''' Training Prox_model'''
-for epoch in range(Adv_epoch):
-    optim = torch.optim.Adam(filter(lambda p: p.requires_grad, Prox_model.parameters()), lr=1e-3, weight_decay=1e-3)
-    train_loss, train_acc = train_model(Prox_model, train_iter, mode = 'ProxLSTM')
-    val_loss, val_acc = eval_model(Prox_model, test_iter, mode ='ProxLSTM')
-    print(f'Epoch: {epoch+1:02}, Train Loss: {train_loss:.3f}, Train Acc: {train_acc:.2f}%, Test Loss: {val_loss:3f}, Test Acc: {val_acc:.2f}%')
-"""
+
+
+
+# """
+# ''' Training Prox_model'''
+# for epoch in range(Adv_epoch):
+#     optim = torch.optim.Adam(filter(lambda p: p.requires_grad, Prox_model.parameters()), lr=1e-3, weight_decay=1e-3)
+#     train_loss, train_acc = train_model(Prox_model, train_iter, mode = 'ProxLSTM')
+#     val_loss, val_acc = eval_model(Prox_model, test_iter, mode ='ProxLSTM')
+#     print(f'Epoch: {epoch+1:02}, Train Loss: {train_loss:.3f}, Train Acc: {train_acc:.2f}%, Test Loss: {val_loss:3f}, Test Acc: {val_acc:.2f}%')
+# """
+
