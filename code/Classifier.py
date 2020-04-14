@@ -21,10 +21,12 @@ class LSTMClassifier(nn.Module):
 		self.relu = nn.ReLU()
 		self.lstm = nn.LSTM(64, hidden_size, batch_first = True)
 		self.linear = nn.Linear(self.hidden_size, self.output_size)
+		# self.register_parameter('lstm_input', None)
+
 
 
 		
-	def forward(self, input, r, batch_size, mode='plain'):
+	def forward(self, input, r, batch_size, mode='plain', epsilon=0.01):
 		# do the forward pass
 		# pay attention to the order of input dimension.
 		# input now is of dimension: batch_size * sequence_length * input_size
@@ -44,15 +46,28 @@ class LSTMClassifier(nn.Module):
 			# print ("h_n " + str(h_n.squeeze().shape))
 			decoded = self.linear(h_n.squeeze())
 			return decoded
-		"""
+
 		if mode == 'AdvLSTM' :
 			# chain up the layers
 			# different from mode='plain', you need to add r to the forward pass
 			# also make sure that the chain allows computing the gradient with respect to the input of LSTM
-
+			normalized = F.normalize(input)
+			embedding = self.conv(normalized.permute(0,2,1)).permute(0,2,1)
+			# if self.lstm_input is None:
+				# self.lstm_input = nn.Parameter(torch.empty(batch_size, , 64))
+			
+			self.lstm_input = self.relu(embedding)
+			self.lstm_input = self.lstm_input + epsilon*r
+			output, (h_n, c_n) = self.lstm(self.lstm_input)
+			decoded = self.linear(h_n.squeeze())
+			return decoded
+		"""
 		if mode == 'ProxLSTM' :
 			# chain up layers, but use ProximalLSTMCell here
 		"""
+
+	def get_lstm_input(self):
+		return self.lstm_input
 		
 # X = torch.tensor([[[1,2,3,4],
 #               [5,6,7,8],
