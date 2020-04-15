@@ -24,8 +24,10 @@ class LSTMClassifier(nn.Module):
 		# self.ProxLSTMCell = pro.ProximalLSTMCell(self.lstmcell, input_size= 64, hidden_size= hidden_size)
 		self.ProxLSTMCell = pro.ProximalLSTMCell(self.lstmcell)
 		self.linear = nn.Linear(self.hidden_size, self.output_size)
+		self.apply_dropout = False
+		self.apply_batch_norm = False
 		self.dropout = nn.Dropout()
-		# self.batch_norm = nn.BatchNorm1d()
+		self.batch_norm = nn.BatchNorm1d(64)
 
 		self.h_t = torch.zeros(self.hidden_size, requires_grad= True)		# h_0
 		self.c_t = torch.zeros(self.hidden_size, requires_grad= True)		# c_0
@@ -62,12 +64,16 @@ class LSTMClassifier(nn.Module):
 		if mode == 'ProxLSTM' :
 			normalized = F.normalize(input)
 			# normalized = self.dropout(normalized)
+			if self.apply_dropout:
+				normalized = self.dropout(normalized)
 			embedding = self.conv(normalized.permute(0,2,1)).permute(2,0,1)
 			self.lstm_input = self.relu(embedding)
+			if self.apply_batch_norm:
+				self.lstm_input = self.batch_norm(self.lstm_input.squeeze())
+				self.lstm_input = self.lstm_input.unsqueeze(0)
 			self.h_t = torch.zeros(self.lstm_input.shape[1], self.hidden_size)		# h_0
 			self.c_t = torch.zeros(self.lstm_input.shape[1], self.hidden_size)		# c_0
 			for seq in self.lstm_input :
-				# TODO: see if we need to multiply by epsilon
 				self.h_t, self.c_t = self.ProxLSTMCell(seq, self.h_t, self.c_t)
 			decoded = self.linear(self.h_t)
 		

@@ -39,7 +39,6 @@ def train_model(model, train_iter, mode, epsilon = 0.01):
     steps = 0
     model.train()
     for idx, batch in enumerate(train_iter):
-        # TODO: check if we need to surround by Variable
         input = batch[0]
         input.requires_grad = True
         target = batch[1]
@@ -52,7 +51,6 @@ def train_model(model, train_iter, mode, epsilon = 0.01):
         loss = loss_fn(prediction, target)
         if mode == 'AdvLSTM':
             ''' Add adversarial training term to loss'''
-            # TODO: check if r is non-zero
             r = compute_perturbation(loss, model)
             adv_prediction = model(input, r, batch_size = input.size()[0], mode = mode)
             loss = loss_fn(adv_prediction, target)
@@ -180,7 +178,7 @@ for epsilon in [0.08, 0.01, 0.1, 1.0]: # (optimal epsilon = 0.08) ep1 = 0.01, ep
 
 
 ''' Training Prox_model'''
-for epoch in range(Adv_epoch):
+for epoch in range(Prox_epoch):
     optim = torch.optim.Adam(filter(lambda p: p.requires_grad, Prox_model.parameters()), lr=1e-3, weight_decay=1e-3)
     train_loss, train_acc = train_model(Prox_model, train_iter, mode = 'ProxLSTM')
     val_loss, val_acc = eval_model(Prox_model, test_iter, mode ='ProxLSTM')

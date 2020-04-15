@@ -21,7 +21,6 @@ class ProximalLSTMCell(ag.Function):
             G_t = torch.zeros(input.shape[0], self.lstm_cell.hidden_size, self.lstm_cell.input_size)
             self.h_t, self.s_t = self.lstm_cell(input+r,(pre_h, pre_c))
             for i in range(self.s_t.size(-1)):
-                print(self.s_t[:,i].shape)
                 g_t = ag.grad(self.s_t[:,i], input, grad_outputs=torch.ones_like(self.s_t[:,0]), retain_graph=True)
                 G_t[:,i,:] = g_t[0]
             self.s_t = self.s_t.unsqueeze(2)
@@ -49,11 +48,12 @@ class ProximalLSTMCell(ag.Function):
 
     def backward(self, grad_h, grad_c):
         '''need to be implemented'''
+        grad_input = grad_pre_c = grad_pre_h = None
         # print(grad_h)
         # print(grad_c)
         # print(self.h_t.backward())
         # dh_dpre_h = 
         # dh_dpre_c = 
-        # return None, None, None
+        return grad_input, grad_pre_c, grad_pre_h
         
 
