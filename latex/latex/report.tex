@@ -87,8 +87,8 @@ See code in \texttt{training.py} under the comment \texttt{Part 3, Save and Load
 
 \section{(10 points) Dropout and Batch Normalization}
 \begin{itemize}
-    \item[a] \textbf{(5 points)} We have implemented a dropout layer in \texttt{Classifier.py}.
-    \item[b] \textbf{(5 points)} We have implemented a batch normalization layer in \texttt{Classifier.py}. 
+    \item[a] \textbf{(5 points)} We have initiated a dropout layer in \texttt{Classifier.py} and we use it with a flag \texttt{apply\_dropout}. When the flag is set to \texttt{True}, we apply the dropout before the convolution layer. We hypothesize this is an optimal position for the dropout layer as the dropped out connections can help regularize the convolution parameters.
+    \item[b] \textbf{(5 points)} We have implemented a batch normalization layer in \texttt{Classifier.py} and like dropout, we have a flag \texttt{apply\_batch\_norm}, which when set to \texttt{True}, is applied before the ProxLSTM layer. We believe it could help the optimization by normalizing the batch of inputs to the ProxLSTM layer. 
 \end{itemize}
 
 
