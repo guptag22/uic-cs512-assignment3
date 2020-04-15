@@ -21,8 +21,11 @@ class LSTMClassifier(nn.Module):
 		self.relu = nn.ReLU()
 		self.lstm = nn.LSTM(64, hidden_size, batch_first = True)
 		self.lstmcell = nn.LSTMCell(input_size= 64, hidden_size= hidden_size)
+		# self.ProxLSTMCell = pro.ProximalLSTMCell(self.lstmcell, input_size= 64, hidden_size= hidden_size)
 		self.ProxLSTMCell = pro.ProximalLSTMCell(self.lstmcell)
 		self.linear = nn.Linear(self.hidden_size, self.output_size)
+		self.dropout = nn.Dropout()
+		# self.batch_norm = nn.BatchNorm1d()
 
 		self.h_t = torch.zeros(self.hidden_size, requires_grad= True)		# h_0
 		self.c_t = torch.zeros(self.hidden_size, requires_grad= True)		# c_0
@@ -33,36 +36,40 @@ class LSTMClassifier(nn.Module):
 		# do the forward pass
 		# pay attention to the order of input dimension.
 		# input now is of dimension: batch_size * sequence_length * input_size
-
-
-		normalized = F.normalize(input)
-		embedding = self.conv(normalized.permute(0,2,1)).permute(2,0,1)
 		
 		if mode == 'plain' :
+			normalized = F.normalize(input)
+			embedding = self.conv(normalized.permute(0,2,1)).permute(2,0,1)
 			self.lstm_input = self.relu(embedding)
 			self.h_t = torch.zeros(self.lstm_input.shape[1], self.hidden_size)		# h_0
 			self.c_t = torch.zeros(self.lstm_input.shape[1], self.hidden_size)		# c_0
 			for seq in self.lstm_input:
 				self.h_t, self.c_t = self.lstmcell(seq, (self.h_t, self.c_t))
+			decoded = self.linear(self.h_t)
 				
 		
 		if mode == 'AdvLSTM' :
+			normalized = F.normalize(input)
+			embedding = self.conv(normalized.permute(0,2,1)).permute(2,0,1)
 			self.lstm_input = self.relu(embedding) + (epsilon * r)
 			self.h_t = torch.zeros(self.lstm_input.shape[1], self.hidden_size)		# h_0
 			self.c_t = torch.zeros(self.lstm_input.shape[1], self.hidden_size)		# c_0
 			for seq in self.lstm_input :
 				self.h_t, self.c_t = self.lstmcell(seq, (self.h_t, self.c_t))
+			decoded = self.linear(self.h_t)
 
 		
 		if mode == 'ProxLSTM' :
+			normalized = F.normalize(input)
+			# normalized = self.dropout(normalized)
+			embedding = self.conv(normalized.permute(0,2,1)).permute(2,0,1)
 			self.lstm_input = self.relu(embedding)
 			self.h_t = torch.zeros(self.lstm_input.shape[1], self.hidden_size)		# h_0
 			self.c_t = torch.zeros(self.lstm_input.shape[1], self.hidden_size)		# c_0
 			for seq in self.lstm_input :
 				# TODO: see if we need to multiply by epsilon
 				self.h_t, self.c_t = self.ProxLSTMCell(seq, self.h_t, self.c_t)
-
-		decoded = self.linear(self.h_t)
+			decoded = self.linear(self.h_t)
 		
 		return decoded
 
