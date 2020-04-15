@@ -22,7 +22,7 @@ def plot_accuracy(epoch, test, file_name, train = None):
     plt.ylabel("Accuracy")
     plt.savefig(path + file_name)
 
-def plot_epsilon(epoch, epoch_epsilon, test_opt, test_ep1, test_ep2, test_ep3, ep_opt, ep1, ep2, ep3, file_name):
+def plot_epsilon(epoch, epoch_epsilon, ep_opt, test_opt, test_ep1, test_ep2, test_ep3, ep1, ep2, ep3, file_name):
 # Data
     x= [x for x in range(epoch)]
     x_ep = [x_ep for x_ep in range(epoch_epsilon)]
@@ -65,6 +65,6 @@ with open(path + "AdvModel_acc.txt", "r") as f:
   for line in f:
     test_acc_adv.append(float(line.strip()))
 
-plot_epsilon(epoch = Adv_epoch, epoch_epsilon = 50, test_opt = test_acc_adv[:100], test_ep1 = test_acc_adv[100:100+50],
-   test_ep2 = test_acc_adv[200:200+50], test_ep3 = test_acc_adv[300:300+50], ep_opt = 6, ep1 = 0.01, ep2 = 0.1, ep3 = 1.0,
-    file_name = 'AdvModel.png')
+plot_epsilon(epoch = Adv_epoch, epoch_epsilon = 50, ep_opt = 0.08, test_opt = test_acc_adv[:100], 
+    test_ep1 = test_acc_adv[100:100 + 50], test_ep2 = test_acc_adv[200:200 + 50], test_ep3 = test_acc_adv[300:300+50], 
+    ep1 = 0.01, ep2 = 0.1, ep3 = 1.0, file_name = 'AdvModel.png')
