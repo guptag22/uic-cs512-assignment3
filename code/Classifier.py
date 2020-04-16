@@ -1,10 +1,11 @@
 
 import torch
 import torch.nn as nn
+import torch.autograd as ag
+import ProxLSTM as pro
+
 from torch.autograd import Variable
 from torch.nn import functional as F
-
-import ProxLSTM as pro
 
 
 
@@ -22,7 +23,7 @@ class LSTMClassifier(nn.Module):
 		self.lstm = nn.LSTM(64, hidden_size, batch_first = True)
 		self.lstmcell = nn.LSTMCell(input_size= 64, hidden_size= hidden_size)
 		# self.ProxLSTMCell = pro.ProximalLSTMCell(self.lstmcell, input_size= 64, hidden_size= hidden_size)
-		self.ProxLSTMCell = pro.ProximalLSTMCell(self.lstmcell)
+		# self.ProxLSTMCell = pro.ProximalLSTMCell(self.lstmcell)
 		self.linear = nn.Linear(self.hidden_size, self.output_size)
 		self.apply_dropout = False
 		self.apply_batch_norm = False
@@ -62,6 +63,7 @@ class LSTMClassifier(nn.Module):
 
 		
 		if mode == 'ProxLSTM' :
+			prox = pro.ProximalLSTMCell.apply
 			normalized = F.normalize(input)
 			# normalized = self.dropout(normalized)
 			if self.apply_dropout:
@@ -73,8 +75,16 @@ class LSTMClassifier(nn.Module):
 				self.lstm_input = self.lstm_input.unsqueeze(0)
 			self.h_t = torch.zeros(self.lstm_input.shape[1], self.hidden_size)		# h_0
 			self.c_t = torch.zeros(self.lstm_input.shape[1], self.hidden_size)		# c_0
-			for seq in self.lstm_input :
-				self.h_t, self.c_t = self.ProxLSTMCell(seq, self.h_t, self.c_t)
+			for seq in self.lstm_input:
+				self.h_t, self.s_t = self.lstmcell(seq,(self.h_t, self.c_t))
+				self.G_t = torch.zeros(seq.shape[0], self.lstmcell.hidden_size, self.lstmcell.input_size)
+				for i in range(self.s_t.size(-1)):
+					g_t = ag.grad(self.s_t[:,i], seq, grad_outputs=torch.ones_like(self.s_t[:,0]), retain_graph=True)[0]
+					# print("g_t: ", g_t)
+					self.G_t[:,i,:] = g_t[0]
+					
+				print("G_t:", self.G_t)
+				self.h_t, self.c_t = prox(self.h_t, self.s_t, self.G_t)
 			decoded = self.linear(self.h_t)
 		
 		return decoded
