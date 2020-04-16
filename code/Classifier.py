@@ -83,7 +83,7 @@ class LSTMClassifier(nn.Module):
 					# print("g_t: ", g_t)
 					self.G_t[:,i,:] = g_t[0]
 					
-				# print("G_t:", self.G_t)
+				# print("G_t.shape", self.G_t.shape)
 				self.h_t, self.c_t = prox(self.h_t, self.s_t, self.G_t)
 			decoded = self.linear(self.h_t)
 		

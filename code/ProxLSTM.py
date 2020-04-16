@@ -51,32 +51,32 @@ class ProximalLSTMCell(ag.Function):
         '''need to be implemented'''
         # grad_input = grad_pre_c = grad_pre_h = None
         h_t, c_t, G_t, inverse = ctx.saved_tensors
-        print("inverse.shape: {}, grad_c.shape: {}".format(inverse.shape, grad_c.unsqueeze(2).shape))
+        # print("inverse.shape: {}, grad_c.shape: {}".format(inverse.shape, grad_c.unsqueeze(2).shape))
                 
         
         
         a = torch.matmul(inverse,grad_c.unsqueeze(2))
         # a = a.squeeze()
         # a_transpose = torch.transpose(a, 1, 2)
-        print("a.shape: ", a.shape)
-        print("c_t.shape: ", c_t.unsqueeze(2).shape)
-        print("transpose shape: ", c_t.unsqueeze(2).permute(0, 2, 1).shape)
+        # print("a.shape: ", a.shape)
+        # print("c_t.shape: ", c_t.unsqueeze(2).shape)
+        # print("transpose shape: ", c_t.unsqueeze(2).permute(0, 2, 1).shape)
         # print(torch.matmul(a, c_t.unsqueeze(2).permute(0, 2, 1)))
         grad_g1 = torch.matmul(a, c_t.unsqueeze(2).permute(0, 2, 1))
         grad_g2 = torch.matmul(c_t.unsqueeze(2), a.permute(0, 2, 1))
-        print("========= : ", (grad_g1 + grad_g2).shape)
-        print("G_t.shape: ", G_t.shape)
+        # print("========= : ", (grad_g1 + grad_g2).shape)
+        # print("G_t.shape: ", G_t.shape)
         grad_g = -torch.matmul(grad_g1 + grad_g2, G_t)
         # grad_g = -torch.matmul((torch.matmul(a, c_t.unsqueeze(2).permute(0, 2, 1)) + torch.matmul(c_t, a.transpose())), G_t)
         
-        print("grad_c.shape: ", grad_c.unsqueeze(2).shape)
-        print("inverse.shape", inverse.shape)
+        # print("grad_c.shape: ", grad_c.unsqueeze(2).shape)
+        # print("inverse.shape", inverse.shape)
         grad_s = torch.matmul(grad_c.unsqueeze(2).permute(0, 2, 1), inverse)
         grad_s = grad_s.squeeze()
 
-        print("grad_g.shape:" , grad_g.shape)
-        print("grad_h.shape:" , grad_h.shape)
-        print("grad_s.shape:" , grad_s.shape)
+        # print("grad_g.shape:" , grad_g.shape)
+        # print("grad_h.shape:" , grad_h.shape)
+        # print("grad_s.shape:" , grad_s.shape)
         # print("grad_c: ", grad_c)
         # grad_g = torch.zeros(27,64)
 
