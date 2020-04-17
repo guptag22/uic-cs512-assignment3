@@ -26,7 +26,7 @@ class LSTMClassifier(nn.Module):
 		# self.ProxLSTMCell = pro.ProximalLSTMCell(self.lstmcell)
 		self.linear = nn.Linear(self.hidden_size, self.output_size)
 		self.apply_dropout = False
-		self.apply_batch_norm = True
+		self.apply_batch_norm = False
 		self.dropout = nn.Dropout()
 		self.batch_norm = nn.BatchNorm1d(64)
 

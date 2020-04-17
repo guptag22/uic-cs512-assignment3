@@ -114,14 +114,14 @@ model = LSTMClassifier(batch_size, output_size, hidden_size, input_size)
 loss_fn = F.cross_entropy
 optim = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=1e-3, weight_decay=1e-3)
 
-# train_acc_basic = []
-# test_acc_basic = []
-# for epoch in range(basic_epoch):
-#     train_loss, train_acc = train_model(model, train_iter, mode = 'plain')
-#     val_loss, val_acc = eval_model(model, test_iter, mode ='plain')
-#     print(f'Epoch: {epoch+1:02}, Train Loss: {train_loss:.3f}, Train Acc: {train_acc:.2f}%, Test Loss: {val_loss:3f}, Test Acc: {val_acc:.2f}%')
-#     train_acc_basic.append(train_acc)
-#     test_acc_basic.append(val_acc)
+train_acc_basic = []
+test_acc_basic = []
+for epoch in range(basic_epoch):
+    train_loss, train_acc = train_model(model, train_iter, mode = 'plain')
+    val_loss, val_acc = eval_model(model, test_iter, mode ='plain')
+    print(f'Epoch: {epoch+1:02}, Train Loss: {train_loss:.3f}, Train Acc: {train_acc:.2f}%, Test Loss: {val_loss:3f}, Test Acc: {val_acc:.2f}%')
+    train_acc_basic.append(train_acc)
+    test_acc_basic.append(val_acc)
 
 # # with open("../Figures/BasicModel_train.txt", "w") as f:
 # #     for item in train_acc_basic:
@@ -156,18 +156,18 @@ Adv_model.load_state_dict(torch.load(model_PATH, map_location = device))
 
 
 # # ''' Training Adv_model'''
-# test_acc_adv = []
-# for epsilon in [0.08, 0.01, 0.1, 1.0]: # (optimal epsilon = 0.08) ep1 = 0.01, ep2 = 0.1 , ep3 = 1
-# ##for epsilon in range(0, 10, 2):
-# ##for epsilon in np.logspace(-5, 5, 11):
-#     Adv_model = LSTMClassifier(batch_size, output_size, hidden_size, input_size)
-#     for epoch in range(Adv_epoch):
-#         optim = torch.optim.Adam(filter(lambda p: p.requires_grad, Adv_model.parameters()), lr=1e-3, weight_decay=1e-3)
-#         train_loss, train_acc = train_model(Adv_model, train_iter, mode = 'AdvLSTM', epsilon = epsilon)
-#         val_loss, val_acc = eval_model(Adv_model, test_iter, mode ='AdvLSTM')
-#         #print(f'Epoch: {epoch+1:02}, Train Loss: {train_loss:.3f}, Train Acc: {train_acc:.2f}%, Test Loss: {val_loss:3f}, Test Acc: {val_acc:.2f}%')
-#         test_acc_adv.append(val_acc)
-#     print(f'Epsilon: {epsilon}, Epoch: {epoch+1:02}, Train Loss: {train_loss:.3f}, Train Acc: {train_acc:.2f}%, Test Loss: {val_loss:3f}, Test Acc: {val_acc:.2f}%')
+test_acc_adv = []
+for epsilon in [0.08, 0.01, 0.1, 1.0]: # (optimal epsilon = 0.08) ep1 = 0.01, ep2 = 0.1 , ep3 = 1
+##for epsilon in range(0, 10, 2):
+##for epsilon in np.logspace(-5, 5, 11):
+    Adv_model = LSTMClassifier(batch_size, output_size, hidden_size, input_size)
+    for epoch in range(Adv_epoch):
+        optim = torch.optim.Adam(filter(lambda p: p.requires_grad, Adv_model.parameters()), lr=1e-3, weight_decay=1e-3)
+        train_loss, train_acc = train_model(Adv_model, train_iter, mode = 'AdvLSTM', epsilon = epsilon)
+        val_loss, val_acc = eval_model(Adv_model, test_iter, mode ='AdvLSTM')
+        print(f'Epoch: {epoch+1:02}, Train Loss: {train_loss:.3f}, Train Acc: {train_acc:.2f}%, Test Loss: {val_loss:3f}, Test Acc: {val_acc:.2f}%')
+        test_acc_adv.append(val_acc)
+    print(f'Epsilon: {epsilon}, Epoch: {epoch+1:02}, Train Loss: {train_loss:.3f}, Train Acc: {train_acc:.2f}%, Test Loss: {val_loss:3f}, Test Acc: {val_acc:.2f}%')
 
 # # with open("../Figures/AdvModel_acc.txt", "w") as txt_file:
 # #     for item in test_acc_adv:
@@ -175,17 +175,17 @@ Adv_model.load_state_dict(torch.load(model_PATH, map_location = device))
 
 
 ''' Training Prox_model'''
-# test_acc_prox = []
-# for prox_epsilon in [0.08, 0.1, 1.0, 5.0]:
-# ###for prox_epsilon in np.logspace(-2,3,6):
-#     Prox_model = LSTMClassifier(batch_size, output_size, hidden_size, input_size)
-#     for epoch in range(Prox_epoch):
-#         optim = torch.optim.Adam(filter(lambda p: p.requires_grad, Prox_model.parameters()), lr=1e-3, weight_decay=1e-3)
-#         train_loss, train_acc = train_model(Prox_model, train_iter, mode = 'ProxLSTM', prox_epsilon=prox_epsilon)
-#         val_loss, val_acc = eval_model(Prox_model, test_iter, mode ='ProxLSTM')
-#         #print(f'Epoch: {epoch+1:02}, Train Loss: {train_loss:.3f}, Train Acc: {train_acc:.2f}%, Test Loss: {val_loss:3f}, Test Acc: {val_acc:.2f}%')
-#         test_acc_prox.append(val_acc)
-#     #print(f'Prox_epsilon: {prox_epsilon}, Epoch: {epoch+1:02}, Train Loss: {train_loss:.3f}, Train Acc: {train_acc:.2f}%, Test Loss: {val_loss:3f}, Test Acc: {val_acc:.2f}%')
+test_acc_prox = []
+for prox_epsilon in [0.08, 0.1, 1.0, 5.0]:
+###for prox_epsilon in np.logspace(-2,3,6):
+    Prox_model = LSTMClassifier(batch_size, output_size, hidden_size, input_size)
+    for epoch in range(Prox_epoch):
+        optim = torch.optim.Adam(filter(lambda p: p.requires_grad, Prox_model.parameters()), lr=1e-3, weight_decay=1e-3)
+        train_loss, train_acc = train_model(Prox_model, train_iter, mode = 'ProxLSTM', prox_epsilon=prox_epsilon)
+        val_loss, val_acc = eval_model(Prox_model, test_iter, mode ='ProxLSTM')
+        print(f'Epoch: {epoch+1:02}, Train Loss: {train_loss:.3f}, Train Acc: {train_acc:.2f}%, Test Loss: {val_loss:3f}, Test Acc: {val_acc:.2f}%')
+        test_acc_prox.append(val_acc)
+    #print(f'Prox_epsilon: {prox_epsilon}, Epoch: {epoch+1:02}, Train Loss: {train_loss:.3f}, Train Acc: {train_acc:.2f}%, Test Loss: {val_loss:3f}, Test Acc: {val_acc:.2f}%')
 
 # # with open("../Figures/ProxModel_acc.txt", "w") as txt_file:
 # #     for item in test_acc_prox:
@@ -195,14 +195,14 @@ Adv_model.load_state_dict(torch.load(model_PATH, map_location = device))
 #### Q6
 ## dropout layer
 ## To run: set self.apply_dropout = True in Classifier.py
-# test_acc_prox_dropout = []
-# Prox_model = LSTMClassifier(batch_size, output_size, hidden_size, input_size)
-# for epoch in range(Prox_epoch):
-#     optim = torch.optim.Adam(filter(lambda p: p.requires_grad, Prox_model.parameters()), lr=1e-3, weight_decay=1e-3)
-#     train_loss, train_acc = train_model(Prox_model, train_iter, mode = 'ProxLSTM', prox_epsilon=1)
-#     val_loss, val_acc = eval_model(Prox_model, test_iter, mode ='ProxLSTM')
-#     print(f'Epoch: {epoch+1:02}, Train Loss: {train_loss:.3f}, Train Acc: {train_acc:.2f}%, Test Loss: {val_loss:3f}, Test Acc: {val_acc:.2f}%')
-#     test_acc_prox_dropout.append(val_acc)
+test_acc_prox_dropout = []
+Prox_model = LSTMClassifier(batch_size, output_size, hidden_size, input_size)
+for epoch in range(Prox_epoch):
+    optim = torch.optim.Adam(filter(lambda p: p.requires_grad, Prox_model.parameters()), lr=1e-3, weight_decay=1e-3)
+    train_loss, train_acc = train_model(Prox_model, train_iter, mode = 'ProxLSTM', prox_epsilon=1)
+    val_loss, val_acc = eval_model(Prox_model, test_iter, mode ='ProxLSTM')
+    print(f'Epoch: {epoch+1:02}, Train Loss: {train_loss:.3f}, Train Acc: {train_acc:.2f}%, Test Loss: {val_loss:3f}, Test Acc: {val_acc:.2f}%')
+    test_acc_prox_dropout.append(val_acc)
 
 
 # # with open("../Figures/ProxModel_acc_dropout.txt", "w") as txt_file:
@@ -220,8 +220,8 @@ for epoch in range(Prox_epoch):
     print(f'Epoch: {epoch+1:02}, Train Loss: {train_loss:.3f}, Train Acc: {train_acc:.2f}%, Test Loss: {val_loss:3f}, Test Acc: {val_acc:.2f}%')
     test_acc_prox_batchnorm.append(val_acc)
 
-with open("../Figures/ProxModel_acc_batchnorm.txt", "w") as txt_file:
-    for item in test_acc_prox_batchnorm:
-        txt_file.write("%s\n" % item) 
+# # with open("../Figures/ProxModel_acc_batchnorm.txt", "w") as txt_file:
+# #     for item in test_acc_prox_batchnorm:
+# #         txt_file.write("%s\n" % item) 
 
 
