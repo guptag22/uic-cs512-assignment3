@@ -72,8 +72,8 @@ class LSTMClassifier(nn.Module):
 			self.lstm_input = self.relu(embedding)
 			# Batch Norm layer
 			if self.apply_batch_norm:
-				self.lstm_input = self.batch_norm(self.lstm_input.squeeze())
-				self.lstm_input = self.lstm_input.unsqueeze(0)
+				self.lstm_input = self.batch_norm(self.lstm_input.permute(0, 2, 1))
+				self.lstm_input = self.lstm_input.permute(0, 2, 1)
 			self.h_t = torch.zeros(self.lstm_input.shape[1], self.hidden_size)		# h_0
 			self.c_t = torch.zeros(self.lstm_input.shape[1], self.hidden_size)		# c_0
 			for seq in self.lstm_input:
