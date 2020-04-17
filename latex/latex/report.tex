@@ -78,17 +78,33 @@ See code in \texttt{training.py} under the comment \texttt{Part 3, Save and Load
 
 \section{(40 points) Adversarial Training as Proximal Mapping}
 \begin{itemize}
-    \item[a] \textbf{(30 points)} We have implemented the ProxLSTMCell in \texttt{ProxLSTM.py}. We have implemented \texttt{forward} pass, but we are having issues with \texttt{backward} pass. 
-    \item[b] \textbf{(10 points)} We have written a branch in \texttt{LSTMClassifier} that can handle \texttt{mode = `ProxLSTM'}. 
-    Because we haven't made \texttt{backward} pass work, we cannot perform the experiment with different $\epsilon = \lambda^{-1}\sigma^2 = [0.1, 1.0, 5.0]$. 
-    But we can imagine that by using the similar code in \texttt{plot.py}, we can generate curves similar to that in the previous section. 
-    We can also imagine that by adding adversarial training as proximal mapping would further increase the test accuracy, especially when compared with basic model. 
+    \item[a] \textbf{(30 points)} We have implemented the ProxLSTMCell in \texttt{ProxLSTM.py}. We also have implemented \texttt{forward} pass and \texttt{backward} pass. See code. 
+    \item[b] \textbf{(10 points)} We have written a branch in \texttt{LSTMClassifier} that can handle \texttt{mode = `ProxLSTM'}. See code. 
+
+    \begin{figure}[h]
+        \includegraphics[width = 15 cm]{ProxModel.png}
+        \centering
+    \end{figure}
+
+    Among the $\epsilon = \lambda^{-1}\sigma^2$ we have tried, $\epsilon = 0.08$ also performed the best. The performance of the model (test accuracy = 92.02\%) did not improve significantly from the previous models. 
+    This is probably because of the small dataset.  
+    We also notice that the small change of $\epsilon$ did not change the performance significantly. 
+    Among $\epsilon = [0.1, 1.0, 5.0]$, $\epsilon = 1.0$ seems to perform the best. 
+
+
 \end{itemize}
 
 \section{(10 points) Dropout and Batch Normalization}
 \begin{itemize}
-    \item[a] \textbf{(5 points)} We have initiated a dropout layer in \texttt{Classifier.py} and we use it with a flag \texttt{apply\_dropout}. When the flag is set to \texttt{True}, we apply the dropout before the convolution layer. We hypothesize this is an optimal position for the dropout layer as the dropped out connections can help regularize the convolution parameters.
-    \item[b] \textbf{(5 points)} We have implemented a batch normalization layer in \texttt{Classifier.py} and like dropout, we have a flag \texttt{apply\_batch\_norm}, which when set to \texttt{True}, is applied before the ProxLSTM layer. We believe it could help the optimization by normalizing the batch of inputs to the ProxLSTM layer. 
+    \item[a] \textbf{(5 points)} We have initiated a dropout layer in \texttt{Classifier.py} and we use it with a flag \texttt{apply\_dropout}. When the flag is set to \texttt{True}, we apply the dropout before the convolution layer. 
+    Our finding was that by adding a dropout layer in \texttt{Classifier.py} did not help regularize the convolution parameters, and improve the test accuracy. 
+    It actually made our model underfit compared to any of the previous models (test accuracy dropped to around 87\%).  
+    The results were stored in \texttt{ProxModel\_acc\_dropout.txt}.
+
+    \item[b] \textbf{(5 points)} We have implemented a batch normalization layer in \texttt{Classifier.py} and like dropout, we have a flag \texttt{apply\_batch\_norm}, which when set to \texttt{True}, is applied before the ProxLSTM layer. 
+    By adding the batch normalization layer, the test accuracy is around 91.5\%. 
+    It doesn't seem to help improve test accuracy greatly. 
+    The results were stored in \texttt{ProxModel\_acc\_batchnorm.txt}.
 \end{itemize}
 
 

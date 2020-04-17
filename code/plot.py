@@ -45,9 +45,11 @@ def plot_epsilon(epoch, epoch_epsilon, ep_opt, test_opt, test_ep1, test_ep2, tes
 
 basic_epoch = 100 
 Adv_epoch = 100
+Prox_epoch = 100
 test_acc_basic = []
 train_acc_basic = []
 test_acc_adv = []
+test_acc_prox = []
 
 with open(path + "BasicModel_train.txt", "r") as f:
   for line in f:
@@ -68,3 +70,15 @@ with open(path + "AdvModel_acc.txt", "r") as f:
 plot_epsilon(epoch = Adv_epoch, epoch_epsilon = 50, ep_opt = 0.08, test_opt = test_acc_adv[:100], 
     test_ep1 = test_acc_adv[100:100 + 50], test_ep2 = test_acc_adv[200:200 + 50], test_ep3 = test_acc_adv[300:300+50], 
     ep1 = 0.01, ep2 = 0.1, ep3 = 1.0, file_name = 'AdvModel.png')
+
+## plot test accuracy of prox_model 
+with open(path + "ProxModel_acc.txt", "r") as f:
+  for line in f:
+    test_acc_prox.append(float(line.strip()))
+
+plot_epsilon(epoch = Prox_epoch, epoch_epsilon = 50, ep_opt = 0.08, test_opt = test_acc_prox[:100], 
+    test_ep1 = test_acc_prox[100:100 + 50], test_ep2 = test_acc_prox[200:200 + 50], test_ep3 = test_acc_prox[300:300+50], 
+    ep1 = 0.1, ep2 = 1.0, ep3 = 5.0, file_name = 'ProxModel.png')
+
+
+
