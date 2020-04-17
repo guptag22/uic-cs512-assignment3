@@ -80,6 +80,6 @@ class ProximalLSTMCell(ag.Function):
         # print("grad_c: ", grad_c)
         # grad_g = torch.zeros(27,64)
 
-        return grad_h, grad_s, grad_g
+        return grad_h, grad_s, grad_g, None
         
 

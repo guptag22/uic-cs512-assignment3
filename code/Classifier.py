@@ -35,7 +35,7 @@ class LSTMClassifier(nn.Module):
 			
 
 		
-	def forward(self, input, r, batch_size, mode='plain', epsilon=0.01):
+	def forward(self, input, r, batch_size, mode='plain', prox_epsilon=1, epsilon=0.01):
 		# do the forward pass
 		# pay attention to the order of input dimension.
 		# input now is of dimension: batch_size * sequence_length * input_size
@@ -65,11 +65,12 @@ class LSTMClassifier(nn.Module):
 		if mode == 'ProxLSTM' :
 			prox = pro.ProximalLSTMCell.apply
 			normalized = F.normalize(input)
-			# normalized = self.dropout(normalized)
+			# Dropout layer
 			if self.apply_dropout:
 				normalized = self.dropout(normalized)
 			embedding = self.conv(normalized.permute(0,2,1)).permute(2,0,1)
 			self.lstm_input = self.relu(embedding)
+			# Batch Norm layer
 			if self.apply_batch_norm:
 				self.lstm_input = self.batch_norm(self.lstm_input.squeeze())
 				self.lstm_input = self.lstm_input.unsqueeze(0)
@@ -84,7 +85,7 @@ class LSTMClassifier(nn.Module):
 					self.G_t[:,i,:] = g_t[0]
 					
 				# print("G_t.shape", self.G_t.shape)
-				self.h_t, self.c_t = prox(self.h_t, self.s_t, self.G_t)
+				self.h_t, self.c_t = prox(self.h_t, self.s_t, self.G_t, prox_epsilon)
 			decoded = self.linear(self.h_t)
 		
 		return decoded

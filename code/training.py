@@ -33,7 +33,7 @@ def clip_gradient(model, clip_value):
 
 
 # Training model
-def train_model(model, train_iter, mode, epsilon = 0.01):
+def train_model(model, train_iter, mode, prox_epsilon=1, epsilon = 0.01):
     total_epoch_loss = 0
     total_epoch_acc = 0
     steps = 0
@@ -45,14 +45,14 @@ def train_model(model, train_iter, mode, epsilon = 0.01):
         target = torch.autograd.Variable(target).long()
         r = 0
         optim.zero_grad()
-        prediction = model(input, r, batch_size = input.size()[0], mode = mode)
+        prediction = model(input, r, batch_size=input.size()[0], mode=mode, prox_epsilon=prox_epsilon)
         # print("prediction ", prediction.shape)
         # print("target ", target.shape)
         loss = loss_fn(prediction, target)
         if mode == 'AdvLSTM':
             ''' Add adversarial training term to loss'''
             r = compute_perturbation(loss, model)
-            adv_prediction = model(input, r, batch_size = input.size()[0], mode = mode)
+            adv_prediction = model(input, r, batch_size=input.size()[0], mode=mode, prox_epsilon=prox_epsilon, epsilon=epsilon)
             loss = loss_fn(adv_prediction, target)
 
 
